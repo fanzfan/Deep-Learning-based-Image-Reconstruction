@@ -30,7 +30,7 @@ class MyDataset(Dataset):
             self._walker = range(int(number_of_files / 5 * 4), number_of_files)
         self._walker = [i for i in self._walker if i not in error_filename]
 
-    def __getitem__(self, n: int):
+    def __getitem__(self, n: int) -> tuple[Tensor, Tensor]:
         if n in error_filename:
             n = 1
         filename = self._walker[n]
@@ -44,7 +44,7 @@ class MyDataset(Dataset):
         y_lr = y_lr if np.shape(y_lr)[0] == 480 else y_lr.T
         if np.shape(y_lr)[0] == 360:
             print("Here")
-        return torch.from_numpy(y).unsqueeze(0) / 255, torch.from_numpy(y_lr).unsqueeze(0) / 255
+        return torch.from_numpy(y).unsqueeze(0), torch.from_numpy(y_lr).unsqueeze(0)
 
     def __len__(self):
         return len(self._walker)
