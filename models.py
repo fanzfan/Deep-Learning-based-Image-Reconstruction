@@ -7,13 +7,12 @@ import torch.nn.functional as F
 class ResBlock(nn.Module):
     def __init__(self, kernel_size=3, n_channels=64):
         super().__init__()
-        self.conv1 = nn.Conv2d(n_channels, n_channels, kernel_size=kernel_size, stride=1, padding=kernel_size)
-        self.conv2 = nn.Conv2d(n_channels, n_channels, kernel_size=kernel_size, stride=1, padding=kernel_size)
+        self.conv1 = nn.Conv2d(n_channels, n_channels, kernel_size=kernel_size, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(n_channels, n_channels, kernel_size=kernel_size, stride=1, padding=1)
 
     def forward(self, x):
         residual = x
-        x = self.conv1(x)
-        x = F.relu(x)
+        x = F.relu(self.conv1(x))
         x = self.conv2(x)
         x = x + residual
         return x
@@ -23,7 +22,7 @@ class ResBlock(nn.Module):
 class AVS3Filter(nn.Module):
     def __init__(self, n_input=1, n_output=1, kernel_size=3, n_channels=64):
         super().__init__()
-        self.conv1 = nn.Conv2d(n_input, n_channels, kernel_size=kernel_size, stride=1, padding=kernel_size)
+        self.conv1 = nn.Conv2d(n_input, n_channels, kernel_size=kernel_size, stride=1, padding=1)
         self.res1 = ResBlock(kernel_size=kernel_size, n_channels=n_channels)
         self.res2 = ResBlock(kernel_size=kernel_size, n_channels=n_channels)
         self.res3 = ResBlock(kernel_size=kernel_size, n_channels=n_channels)
@@ -41,8 +40,8 @@ class AVS3Filter(nn.Module):
         self.res15 = ResBlock(kernel_size=kernel_size, n_channels=n_channels)
         self.res16 = ResBlock(kernel_size=kernel_size, n_channels=n_channels)
         self.res17 = ResBlock(kernel_size=kernel_size, n_channels=n_channels)
-        self.conv2 = nn.Conv2d(n_channels, n_channels, kernel_size=kernel_size, stride=1, padding=kernel_size)
-        self.conv3 = nn.Conv2d(n_channels, n_output, kernel_size=kernel_size, stride=1, padding=kernel_size)
+        self.conv2 = nn.Conv2d(n_channels, n_channels, kernel_size=kernel_size, stride=1, padding=1)
+        self.conv3 = nn.Conv2d(n_channels, n_output, kernel_size=kernel_size, stride=1, padding=1)
 
     def forward(self, x):
         rec = x  # reconstructed frame, in Fig.2
