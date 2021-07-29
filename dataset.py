@@ -5,20 +5,21 @@ from torchvision.transforms import CenterCrop
 
 # 目前已知的，读取有问题的样本
 error_filename = [9659, 10549, 10552]
-# 让输入图片等维
-transform = CenterCrop(size=(96, 96))
 
 class VelaDataset(Dataset):
     def __init__(self,
                  root,
                  number_of_files=19140,
+                 sizeOfCrop = (96, 96),
                  subset: Optional[str] = None):
         # 划分数据集
         assert subset is None or subset in ["training", "validation", "testing"], (
                 "When `subset` not None, it must take a value from "
                 + "{'training', 'validation', 'testing'}."
         )
+
         self._path = root
+        self._transform = CenterCrop(size=sizeOfCrop)
 
         # 划分数据集，其中训练集60%，测试集20%，验证集20%
         if subset == "training":
@@ -42,7 +43,7 @@ class VelaDataset(Dataset):
             image = image.permute(0, 2, 1)
         if shape_lr[1] > 400:
             image_lr = image_lr.permute(0, 2, 1)
-        return transform(image), transform(image_lr)
+        return self._transform(image), self._transform(image_lr)
 
     def __len__(self):
         return len(self._walker)
