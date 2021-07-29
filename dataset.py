@@ -1,24 +1,10 @@
 from typing import Optional
-import torch
-from torch import Tensor
 from torch.utils.data import Dataset
 from torchvision.io import read_image, ImageReadMode
-import torchvision.transforms
 
 # 目前已知的，读取有问题的样本
 error_filename = [9659, 10549, 10552]
 
-# 让输入图片等维
-# 变换
-transform = torchvision.transforms.CenterCrop(size=480)
-# 是否有GPU加速
-device = "cuda" if torch.cuda.is_available() else "cpu"
-if device == "cuda":
-    num_workers = 1
-    pin_memory = True
-else:
-    num_workers = 0
-    pin_memory = False
 
 class VelaDataset(Dataset):
     def __init__(self,
@@ -48,9 +34,13 @@ class VelaDataset(Dataset):
         filename = self._walker[n]
         image = read_image(self._path + "HighRes/" + str(filename) + ".jpg", mode=ImageReadMode.GRAY)
         image_lr = read_image(self._path + "LowRes/" + str(filename) + ".jpg", mode=ImageReadMode.GRAY)
-        image = image.to(device)
-        image_lr = image_lr.to(device)
-        return transform(image), transform(image_lr)
+        shape = image.shape
+        shape_lr = image_lr.shape
+        if shape[1] > 400:
+            image = image.permute(0, 2, 1)
+        if shape_lr[1] > 400:
+            image_lr = image_lr.permute(0, 2, 1)
+        return image, image_lr
 
     def __len__(self):
         return len(self._walker)
