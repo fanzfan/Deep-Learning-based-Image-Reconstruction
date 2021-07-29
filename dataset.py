@@ -1,10 +1,12 @@
 from typing import Optional
 from torch.utils.data import Dataset
 from torchvision.io import read_image, ImageReadMode
+from torchvision.transforms import CenterCrop
 
 # 目前已知的，读取有问题的样本
 error_filename = [9659, 10549, 10552]
-
+# 让输入图片等维
+transform = CenterCrop(size=[360, 480])
 
 class VelaDataset(Dataset):
     def __init__(self,
@@ -40,7 +42,7 @@ class VelaDataset(Dataset):
             image = image.permute(0, 2, 1)
         if shape_lr[1] > 400:
             image_lr = image_lr.permute(0, 2, 1)
-        return image, image_lr
+        return CenterCrop(image), (image_lr)
 
     def __len__(self):
         return len(self._walker)
