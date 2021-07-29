@@ -67,3 +67,26 @@ class AVS3Filter(nn.Module):
         x = self.conv3(x)
         x = x + rec
         return x
+
+
+# Neutral network for AVS3 coding in-loop filter
+class AVS3Filter2(nn.Module):
+    def __init__(self, n_input=1, n_output=1, kernel_size=3, n_channels=64):
+        super().__init__()
+        self.conv1 = nn.Conv2d(n_input, n_channels, kernel_size=kernel_size, stride=1, padding=1)
+        self.res1 = ResBlock(kernel_size=kernel_size, n_channels=n_channels)
+        self.res2 = ResBlock(kernel_size=kernel_size, n_channels=n_channels)
+        self.res3 = ResBlock(kernel_size=kernel_size, n_channels=n_channels)
+        self.conv2 = nn.Conv2d(n_channels, n_channels, kernel_size=kernel_size, stride=1, padding=1)
+        self.conv3 = nn.Conv2d(n_channels, n_output, kernel_size=kernel_size, stride=1, padding=1)
+
+    def forward(self, x):
+        rec = x  # reconstructed frame, in Fig.2
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.res1(x))
+        x = F.relu(self.res2(x))
+        x = F.relu(self.res3(x))
+        x = F.relu(self.conv2(x))
+        x = self.conv3(x)
+        x = x + rec
+        return x
