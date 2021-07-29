@@ -10,7 +10,14 @@ error_filename = [9659, 10549, 10552]
 # 让输入图片等维
 # 变换
 transform = torchvision.transforms.CenterCrop(size=480)
-
+# 是否有GPU加速
+device = "cuda" if torch.cuda.is_available() else "cpu"
+if device == "cuda":
+    num_workers = 1
+    pin_memory = True
+else:
+    num_workers = 0
+    pin_memory = False
 
 class VelaDataset(Dataset):
     def __init__(self,
@@ -40,6 +47,8 @@ class VelaDataset(Dataset):
         filename = self._walker[n]
         image = read_image(self._path + "HighRes/" + str(filename) + ".jpg", mode=ImageReadMode.GRAY)
         image_lr = read_image(self._path + "LowRes/" + str(filename) + ".jpg", mode=ImageReadMode.GRAY)
+        image = image.to(device)
+        image_lr = image_lr.to(device)
         return transform(image), transform(image_lr)
 
     def __len__(self):
