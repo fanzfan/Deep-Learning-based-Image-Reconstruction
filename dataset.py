@@ -6,7 +6,7 @@ from torchvision.transforms import CenterCrop
 # 目前已知的，读取有问题的样本
 error_filename = [9659, 10549, 10552]
 # 让输入图片等维
-transform = CenterCrop(size=48)
+transform = CenterCrop(size=(96, 96))
 
 class VelaDataset(Dataset):
     def __init__(self,
@@ -36,14 +36,13 @@ class VelaDataset(Dataset):
         filename = self._walker[n]
         image = read_image(self._path + "HighRes/" + str(filename) + ".jpg", mode=ImageReadMode.GRAY)
         image_lr = read_image(self._path + "LowRes/" + str(filename) + ".jpg", mode=ImageReadMode.GRAY)
-        """
         shape = image.shape
         shape_lr = image_lr.shape
+        
         if shape[1] > 400:
             image = image.permute(0, 2, 1)
         if shape_lr[1] > 400:
             image_lr = image_lr.permute(0, 2, 1)
-        """
         return transform(image), transform(image_lr)
 
     def __len__(self):
