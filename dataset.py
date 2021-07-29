@@ -10,7 +10,7 @@ class VelaDataset(Dataset):
     def __init__(self,
                  root,
                  number_of_files=19140,
-                 sizeOfCrop = (96, 96),
+                 sizeOfCrop = [96, 96],
                  subset: Optional[str] = None):
         # 划分数据集
         assert subset is None or subset in ["training", "validation", "testing"], (
