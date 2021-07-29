@@ -8,12 +8,17 @@ class ResBlock(nn.Module):
     def __init__(self, kernel_size=3, n_channels=64):
         super().__init__()
         self.conv1 = nn.Conv2d(n_channels, n_channels, kernel_size=kernel_size, stride=1, padding=1)
+        self.bn1 = nn.BatchNorm2d(n_channels)
         self.conv2 = nn.Conv2d(n_channels, n_channels, kernel_size=kernel_size, stride=1, padding=1)
+        self.bn2 = nn.BatchNorm2d(n_channels)
 
     def forward(self, x):
         residual = x
-        x = F.relu(self.conv1(x))
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = F.relu(x)
         x = self.conv2(x)
+        x = self.bn2(x)
         x = x + residual
         return x
 
@@ -23,6 +28,7 @@ class AVS3Filter(nn.Module):
     def __init__(self, n_input=1, n_output=1, kernel_size=3, n_channels=64):
         super().__init__()
         self.conv1 = nn.Conv2d(n_input, n_channels, kernel_size=kernel_size, stride=1, padding=1)
+        self.bn1 = nn.BatchNorm2d(n_channels)
         self.res1 = ResBlock(kernel_size=kernel_size, n_channels=n_channels)
         self.res2 = ResBlock(kernel_size=kernel_size, n_channels=n_channels)
         self.res3 = ResBlock(kernel_size=kernel_size, n_channels=n_channels)
@@ -41,11 +47,14 @@ class AVS3Filter(nn.Module):
         self.res16 = ResBlock(kernel_size=kernel_size, n_channels=n_channels)
         self.res17 = ResBlock(kernel_size=kernel_size, n_channels=n_channels)
         self.conv2 = nn.Conv2d(n_channels, n_channels, kernel_size=kernel_size, stride=1, padding=1)
+        self.bn2 = nn.BatchNorm2d(n_channels)
         self.conv3 = nn.Conv2d(n_channels, n_output, kernel_size=kernel_size, stride=1, padding=1)
+        self.bn3 = nn.BatchNorm2d(n_channels)
 
     def forward(self, x):
         rec = x  # reconstructed frame, in Fig.2
-        x = F.relu(self.conv1(x))
+        x = self.conv1(x)
+        x = F.relu(self.bn1(x))
         x = F.relu(self.res1(x))
         x = F.relu(self.res2(x))
         x = F.relu(self.res3(x))
@@ -63,8 +72,10 @@ class AVS3Filter(nn.Module):
         x = F.relu(self.res15(x))
         x = F.relu(self.res16(x))
         x = F.relu(self.res17(x))
-        x = F.relu(self.conv2(x))
+        x = self.conv2(x)
+        x = F.relu(self.bn2(x))
         x = self.conv3(x)
+        x = self.bn3(x)
         x = x + rec
         return x
 
