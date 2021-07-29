@@ -42,7 +42,7 @@ class VelaDataset(Dataset):
             image = image.permute(0, 2, 1)
         if shape_lr[1] > 400:
             image_lr = image_lr.permute(0, 2, 1)
-        return CenterCrop(image), (image_lr)
+        return CenterCrop(image), CenterCrop(image_lr)
 
     def __len__(self):
         return len(self._walker)
