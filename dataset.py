@@ -1,4 +1,5 @@
 from typing import Optional
+import torch
 from torch import Tensor
 from torch.utils.data import Dataset
 from torchvision.io import read_image, ImageReadMode
