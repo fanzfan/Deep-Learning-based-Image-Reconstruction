@@ -42,7 +42,7 @@ class VelaDataset(Dataset):
         self._walker = [i for i in self._walker if i not in error_filename]
 
     # 实现getitem方法
-    def __getitem__(self, n: int) -> tuple[Tensor, Tensor]:
+    def __getitem__(self, n: int):
         if n in error_filename:
             n = 1
         filename = self._walker[n]
