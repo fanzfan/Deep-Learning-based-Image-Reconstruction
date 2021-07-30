@@ -55,7 +55,7 @@ class AVS3Filter(nn.Module):
         self.conv2 = nn.Conv2d(n_channels, n_channels, kernel_size=kernel_size, stride=1, padding=1)
         self.bn2 = nn.BatchNorm2d(n_channels)
         self.conv3 = nn.Conv2d(n_channels, n_output, kernel_size=kernel_size, stride=1, padding=1)
-        self.bn3 = nn.BatchNorm2d(n_channels)
+        self.bn3 = nn.BatchNorm2d(n_output)
 
     def forward(self, x):
         rec = x  # reconstructed frame, in Fig.2
