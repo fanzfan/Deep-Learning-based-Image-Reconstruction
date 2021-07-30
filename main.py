@@ -1,33 +1,10 @@
-from random import random
-
+import matplotlib.pyplot as plt
 import torch
 
+from dataset import VelaDataset
 from models import AVS3Filter
-from dataset import MyDataset
-import torch.nn.functional as F
-from torchvision.io import read_image, encode_jpeg, write_jpeg
-import cv2
-import matplotlib.pyplot as plt
-import numpy as np
 
-"""
-def read(path: str):
-    image = cv2.imread(path)
-    ycrcb = cv2.cvtColor(image, cv2.COLOR_RGB2YCR_CB)
-    y = ycrcb[:, :, 0]
-    ycrcb[:, :, 1] = 128
-    ycrcb[:, :, 2] = 128
-    im = cv2.cvtColor(ycrcb, cv2.COLOR_YCR_CB2RGB)
-    plt.imshow(im)
-    plt.show()
-    im2 = cv2.imread('./1.jpg')
-    ycrcb = cv2.cvtColor(im2, cv2.COLOR_RGB2YCR_CB)
-    ycrcb[:, :, 0] = y
-    x = cv2.cvtColor(ycrcb, cv2.COLOR_YCR_CB2RGB)
-    cv2.imwrite('2.jpg', x, [cv2.IMWRITE_PNG_COMPRESSION, 90])
-    a = 1
-"""
-
+# check if it is cuda available
 device = "cuda" if torch.cuda.is_available() else "cpu"
 if device == "cuda":
     num_workers = 1
@@ -35,15 +12,26 @@ if device == "cuda":
 else:
     num_workers = 0
     pin_memory = False
-model = AVS3Filter()
-model.to(device)
-mse_loss = torch.nn.MSELoss()
-train_set = MyDataset(root="./", number_of_files=19140, subset="training")
-test_set = MyDataset(root="./", number_of_files=19140, subset="testing")
+
+# load the network
+model = AVS3Filter().to(device)
+
+# loss function, MSE(Mean Square Error) is used
+loss_fun = torch.nn.MSELoss().to(device)
+losses = []
+losses_test = []
+
+# load the dataset
+train_set = VelaDataset(root="./", number_of_files=19140, size_of_crop=48, subset="training")
+test_set = VelaDataset(root="./", number_of_files=19140, size_of_crop=48, subset="testing")
+# validation_set = VelaDataset(root="./", number_of_files=19140, size_of_crop=48, subset="validation")
+
+
 optimizer = torch.optim.Adam(model.parameters())
+# the batch size, can be adjusted by the size of graphical memory
+batch_size = 2
 
-batch_size = 256
-
+# dataset loader
 train_loader = torch.utils.data.DataLoader(
     train_set,
     batch_size=batch_size,
@@ -59,20 +47,15 @@ test_loader = torch.utils.data.DataLoader(
     num_workers=num_workers,
     pin_memory=pin_memory
 )
-losses = []
-losses_test = []
 
 
-# optimizer = torch.optim.Adam(model.parameters(), lr=0.02, weight_decay=0.001)
-# scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=40, gamma=0.1)  # 40次迭代后开始降低学习率，避免过拟合
-
+# train function
 def train(model, epoch, log_interval):
     model.train()
-    for batch_idx, images in enumerate(train_loader):
-        y, y_lr = images
-        output = model(y_lr)
-        loss = F.nll_loss(output.squeeze(), y)
-
+    for batch_idx, (y, y_lr) in enumerate(train_loader):
+        y, y_lr = y.to(device, torch.float), y_lr.to(device, torch.float)
+        output = model(y_lr / 255)
+        loss = loss_fun(output, y / 255)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -86,23 +69,25 @@ def train(model, epoch, log_interval):
         losses.append(loss.item())
 
 
-
-
-
+# test function
 def test(model, epoch):
     model.eval()
     for y, y_lr in test_loader:
-        y_lr = y_lr.to(device)
-        y = y.to(device)
-        output = model(y_lr)
-        loss = F.nll_loss(output.squeeze(), y)
+        y_lr = y_lr.to(device, torch.float)
+        y = y.to(device, torch.float)
+        output = model(y_lr / 255)
+        loss = loss_fun(output, y / 255)
         losses_test.append(loss)
+        # 更新状态栏
+        # pbar.update(pbar_update)
     print(f"\n迭代次数 {epoch}\t训练损失: {loss.item():.6f}")
 
 
 if __name__ == '__main__':
     n_epoch = 100
-    log_interval = 20
+    log_interval = 1
+
+    # 迭代训练
     for epoch in range(1, n_epoch + 1):
         train(model, epoch, log_interval)
         test(model, epoch)

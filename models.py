@@ -1,6 +1,12 @@
 import torch.nn as nn
 import torch.nn.functional as F
 
+"""
+    Author : Vela Yang
+    Last edited : 30th, July, 2021
+    Framework : PyTorch
+    This .py file implements the Residual Block of ResNet and the AVS3 in-loop filter for luminance channel(Y channel, Y of YUV)
+"""
 
 # single residual block of the ResNet
 # !REMIND : a relu function should be followed by this block
@@ -49,7 +55,7 @@ class AVS3Filter(nn.Module):
         self.conv2 = nn.Conv2d(n_channels, n_channels, kernel_size=kernel_size, stride=1, padding=1)
         self.bn2 = nn.BatchNorm2d(n_channels)
         self.conv3 = nn.Conv2d(n_channels, n_output, kernel_size=kernel_size, stride=1, padding=1)
-        self.bn3 = nn.BatchNorm2d(n_output)
+        self.bn3 = nn.BatchNorm2d(n_channels)
 
     def forward(self, x):
         rec = x  # reconstructed frame, in Fig.2
@@ -76,28 +82,5 @@ class AVS3Filter(nn.Module):
         x = F.relu(self.bn2(x))
         x = self.conv3(x)
         x = self.bn3(x)
-        x = x + rec
-        return x
-
-
-# Neutral network for AVS3 coding in-loop filter
-class AVS3Filter2(nn.Module):
-    def __init__(self, n_input=1, n_output=1, kernel_size=3, n_channels=64):
-        super().__init__()
-        self.conv1 = nn.Conv2d(n_input, n_channels, kernel_size=kernel_size, stride=1, padding=1)
-        self.res1 = ResBlock(kernel_size=kernel_size, n_channels=n_channels)
-        self.res2 = ResBlock(kernel_size=kernel_size, n_channels=n_channels)
-        self.res3 = ResBlock(kernel_size=kernel_size, n_channels=n_channels)
-        self.conv2 = nn.Conv2d(n_channels, n_channels, kernel_size=kernel_size, stride=1, padding=1)
-        self.conv3 = nn.Conv2d(n_channels, n_output, kernel_size=kernel_size, stride=1, padding=1)
-
-    def forward(self, x):
-        rec = x  # reconstructed frame, in Fig.2
-        x = F.relu(self.conv1(x))
-        x = F.relu(self.res1(x))
-        x = F.relu(self.res2(x))
-        x = F.relu(self.res3(x))
-        x = F.relu(self.conv2(x))
-        x = self.conv3(x)
         x = x + rec
         return x
