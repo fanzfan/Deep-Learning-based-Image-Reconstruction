@@ -41,7 +41,7 @@ class VelaDataset(Dataset):
         self._path = root
 
         # crop function
-        self._crop = CenterCrop(size=size_of_crop)
+        #self._crop = CenterCrop(size=size_of_crop)
 
         # divide the dataset
         assert subset is None or subset in ["training", "validation", "testing"], (
@@ -80,7 +80,7 @@ class VelaDataset(Dataset):
             image = image.permute(0, 2, 1)
         if shape_lr[1] > 400:
             image_lr = image_lr.permute(0, 2, 1)
-        return image[:, 1:48, 1:48], image_lr[:, 1:48, 1:48]
+        return image, image_lr
 
     def __len__(self):
         return len(self._walker)
