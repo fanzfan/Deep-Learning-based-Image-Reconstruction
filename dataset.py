@@ -41,7 +41,7 @@ class VelaDataset(Dataset):
         self._path = root
 
         # crop function
-        #self._crop = CenterCrop(size=size_of_crop)
+        self._crop = CenterCrop(size=size_of_crop)
 
         # divide the dataset
         assert subset is None or subset in ["training", "validation", "testing"], (
@@ -72,7 +72,6 @@ class VelaDataset(Dataset):
         image = read_image(self._path + "HighRes/" + str(filename) + ".jpg", mode=ImageReadMode.GRAY)
         image_lr = read_image(self._path + "LowRes/" + str(filename) + ".jpg", mode=ImageReadMode.GRAY)
 
-
         # if the image should be transposed
         shape = image.shape
         shape_lr = image_lr.shape
@@ -80,6 +79,7 @@ class VelaDataset(Dataset):
             image = image.permute(0, 2, 1)
         if shape_lr[1] > 400:
             image_lr = image_lr.permute(0, 2, 1)
+        image, image_lr = self._crop(image), self._crop(image_lr)
         return image, image_lr
 
     def __len__(self):
