@@ -74,13 +74,13 @@ class VelaDataset(Dataset):
 
 
         # if the image should be transposed
-        # shape = image.shape
-        # shape_lr = image_lr.shape
-        # if shape[1] > 400:
-        #     image = image.permute(0, 2, 1)
-        # if shape_lr[1] > 400:
-        #     image_lr = image_lr.permute(0, 2, 1)
-        return self._crop(image), self._crop(image_lr)
+        shape = image.shape
+        shape_lr = image_lr.shape
+        if shape[1] > 400:
+            image = image.permute(0, 2, 1)
+        if shape_lr[1] > 400:
+            image_lr = image_lr.permute(0, 2, 1)
+        return image[:, 1:48, 1:48], image_lr[:, 1:48, 1:48]
 
     def __len__(self):
         return len(self._walker)
