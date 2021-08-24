@@ -3,5 +3,9 @@
  The network is implemented with [PyTorch](https://pytorch.org/).
 
 ## Performance of the network
- ... unfinished
+<div align="center">
+<img src="./intro/intro.png" width="1280" />
+</div>
+We can know from the above picture that CNN presents its impressive performance on Image-Reconstruction.
 
+...unfinished
