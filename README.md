@@ -4,7 +4,7 @@
 
 ## Performance of the network
 <div align="center">
-<img src="./intro/intro.png" width="1280" />
+<img src="./intro/intro.png" width="2560" />
 </div>
 We can know from the above picture that CNN presents its impressive performance on Image-Reconstruction.
 
